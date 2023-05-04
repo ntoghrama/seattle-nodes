@@ -30,12 +30,17 @@ x_axis=np.linspace(-100,100,8001)   # lin space for number of data points per st
 #study_areas = ['All_stations','West','East','transect_1','transect_2','transect_3','transect_4']
 study_areas = ['All_stations']
 freqs_disp_seconds = np.array([[0.1,1.0,10],[1.0,10.0,1],[0.1,0.2,20],[0.2,0.5,8],[0.5,1.0,6],[1.0,2.0,4],[2.0,4.0,2],[4.0,8.0,0.5]])
-cluster_filters = ['0.1-1.0Hz','1.0-10.0Hz','0.1-0.2Hz','0.2-0.5Hz','0.5-1.0Hz','1.0-2.0Hz','2.0-4.0Hz','4.0-8.0Hz']
+# cluster_filters = ['0.1-1.0Hz','1.0-10.0Hz','0.1-0.2Hz','0.2-0.5Hz','0.5-1.0Hz','1.0-2.0Hz','2.0-4.0Hz','4.0-8.0Hz']
+cluster_filters = ['1.0-10.0Hz','0.1-0.2Hz','0.2-0.5Hz','0.5-1.0Hz','1.0-2.0Hz','2.0-4.0Hz','4.0-8.0Hz']
 
-cluster_labels = ['cl2','cl1','cl-4']  ## cl1=day, cl2=night, cl-4=else
+cluster_labels = ['cl1','cl2','cl-4']  ## cl1=day, cl2=night, cl-4=else
 channel = 'ZZ'
 figs_dir = '/mnt/data1/SEATTLE_June-2021_studies/figures/Seattle-ACF-plots/stacked_clustered_whitening-corrected_ACFs--August-2022/' 
 if not os.path.isdir(figs_dir):os.makedirs(figs_dir)
+
+## to mark latitudes of SFZ surface features on plot:
+SFZ_deformation_front_stn = 76
+SFZ_main_fault_trace_stn = 930
 
 for study_area in study_areas:
 
@@ -81,7 +86,8 @@ for study_area in study_areas:
 
             plt.cla()
             plt.close()
-            plt.figure(figsize=(15,20))
+            # plt.figure(figsize=(15,20))
+            plt.figure(figsize=(8,20))
             plt.tight_layout()
 
             for i, ff in enumerate(files):    # looping through all station pairs (each .h5 file being one station pair)
@@ -90,12 +96,17 @@ for study_area in study_areas:
                     data_h5=h5py.File(ff,mode='r')
                     corr_windows=data_h5['corr_windows']['data'][0][0:]
                 except: continue
-
+                
                 stn_name_int=int(ff.split('.')[1]) 
 
                 if stn_name_int not in stations:
                     print("Station ",str(stn_name_int),' is not in study area--skipping.')
                     continue
+                
+                # # for plotting SFZ surface features:
+                # if stn_name_int==SFZ_deformation_front_stn:
+
+                # if stn_name_int==SFZ_main_fault_trace_stn:
 
                 stn_1=ff.split('/')[-1].split('..')[0] 
                 stn_2=ff.split('/')[-1].split('..')[1].split('--')[-1] 
@@ -183,6 +194,7 @@ for study_area in study_areas:
 
             plot_list=np.array(plot_list) ## this is the list of waveforms sorted by file. same sort as array 'lats'        
 
+
             ## sort list of data by a list of latitudes, and then sort the latitudes themselves after:
             waveforms_by_lat=[p for _,p in sorted(zip(lats,plot_list))]   ## this is the array of DATA sorted by lat
             lats_sorted=sorted(lats) ## use sorted latitudes as x-axis
@@ -192,13 +204,57 @@ for study_area in study_areas:
             station_grid, lag_grid = np.meshgrid(station_indices,x_axis[4000:],indexing='ij')
             plt.pcolormesh(station_grid, lag_grid, waveforms_by_lat, cmap='seismic') 
 
+            ## to plot SFZ surface features along x-axis -- find the INDEX of the station that aligns with each feature:
+            SFZ_deformation_front_stn = 76
+            SFZ_main_fault_trace_stn = 930
+            x_def_front=47.596494
+            x_fault_trace=47.577676
+            def_front_idx = lats_sorted.index(x_def_front)
+            fault_trace_idx = lats_sorted.index(x_fault_trace)
+            # print(def_front_idx)
+            # print(fault_trace_idx)
+            # sys.exit()
+
+            plt.plot(def_front_idx, 1, marker="D", markersize=12, markerfacecolor='yellow',markeredgecolor='y')
+            # plt.plot(fault_trace_idx, 0, marker="D", markersize=8, color='limegreen')
+
+            # print(np.min(lats_sorted),np.max(lats_sorted));sys.exit()
+
+            # to have lag time axis instead of points:
+            # lag_time = points / sampling rate
+            num_data_points = len(plot_list[0])
+            sampling_rate=40.
+            # lag_time_yaxis=(num_data_points-1)/sampling_rate
+
             ax=plt.gca()
             ax.invert_yaxis()
-            plt.xlabel('ACFs arranged by station latitude')
-            plt.xticks(np.arange(np.min(lats),np.max(lats),0.1),visible=True)
-            plt.ylabel('points')
-            plt.annotate('NORTH',xy=[86,0],size=20)
-            plt.annotate('SOUTH',xy=[0,0],size=20)
-            plt.title("Linear stack ACFs, "+str(study_area)+', '+str(channel)+" component, mean removed, renormalized, "+str(freqmin)+'-'+str(freqmax)+' Hz, cluster '+str(cl.split('l')[-1])+', '+cluster_name)
-            plt.savefig('/home/natasha/Downloads/test-SFZ-figs/ACFs_plot_'+str(freqmin)+'-'+str(freqmax)+'-Hz_'+mean_setting+'_'+str(channel)+'_'+study_area+'_'+cl+'_'+cluster_name+'_'+str(display_seconds)+'-sec.png',orientation='landscape')
+            ax.set_title(str(channel)+" autocorrelation functions sorted by station latitude, "+str(freqmin)+'-'+str(freqmax)+' Hz', pad=14,fontsize=16) ## add spacing between plot title and plot
+            print(cl+'_'+cluster_name)
+            print(str(channel)+" autocorrelation functions sorted by station latitude, "+str(freqmin)+'-'+str(freqmax)+' Hz')
+            print(np.min(lats_sorted),np.max(lats_sorted))
+            print('mid array lat is: ')
+            print((np.max(lats_sorted)+np.min(lats_sorted))/2)
+            # ttl = ax.title
+            # ttl.set_position([.5, 1.05])
+            # plt.title(str(channel)+" autocorrelation functions sorted by station latitude, "+str(freqmin)+'-'+str(freqmax)+' Hz',fontsize=16)
+
+
+            # print(np.arange(np.min(lats),np.max(lats),0.01))
+            # plt.gcf().subplots_adjust(bottom=0.15) # add buffer so x-axis label not cutoff - natasha
+
+            # plt.xticks(ticks=np.arange(np.min(lats),np.max(lats),0.01),fontsize=4) ### wrong
+            # plt.xticks(np.arange(np.min(lats),np.max(lats),0.1),visible=True) ### wrong
+            plt.xlabel('Station latitude',fontsize=12)
+
+            plt.yticks(ticks=np.arange(0,num_data_points/sampling_rate,10),fontsize=12)
+            plt.ylabel('Lag time (s)',fontsize=12)
+            # plt.annotate('NORTH',xy=[86,0],size=20)
+            # plt.annotate('SOUTH',xy=[0,0],size=20)
+            # plt.title("Linear stack ACFs, "+str(study_area)+', '+str(channel)+" component, mean removed, renormalized, "+str(freqmin)+'-'+str(freqmax)+' Hz, cluster '+str(cl.split('l')[-1])+', '+cluster_name)
+            # plt.title("Autocorrelation functions sorted by station latitude, "+str(channel)+", "+str(freqmin)+'-'+str(freqmax)+' Hz, '+cluster_name+' cluster ',fontsize=14)
+            # plt.title(str(channel)+" autocorrelation functions sorted by station latitude, "+str(freqmin)+'-'+str(freqmax)+' Hz',fontsize=16)
+            # plt.savefig('/home/natasha/Downloads/test-SFZ-figs/ACFs_plot_'+str(freqmin)+'-'+str(freqmax)+'-Hz_'+mean_setting+'_'+str(channel)+'_'+study_area+'_'+cl+'_'+cluster_name+'_'+str(display_seconds)+'-sec.png',orientation='landscape')
+            plt.savefig('/mnt/data1/SEATTLE_June-2021_studies/figures/Seattle-ACF-plots/stacked_clustered_whitening-corrected_ACFs--August-2022/heatmap-ACF-plots/ACFs_plot_'+str(freqmin)+'-'+str(freqmax)+'-Hz_'+mean_setting+'_'+str(channel)+'_'+study_area+'_'+cl+'_'+cluster_name+'_'+'with-deformation-front.png',orientation='landscape')
+            # plt.show()
+            # sys.exit()
             plt.cla()
