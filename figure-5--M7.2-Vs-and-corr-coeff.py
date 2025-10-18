@@ -42,7 +42,8 @@ diffwindow = window_to_corrcoeff_end - window_to_corrcoeff_begin
 
 default_font = plt.rcParams['font.family'][0] 
 
-KM_PER_DEG = 111.19
+earth_radius_km = 6371.
+KM_PER_DEG = (np.pi * earth_radius_km) / 180.
 VS_CMAP = mcolors.LinearSegmentedColormap.from_list("Vs_abs", [(0,"green"),(.5,"yellow"),(1,"red")])
 
 # functions
@@ -53,7 +54,7 @@ def truncate_colormap(cmap, minval=0.08, maxval=0.98, n=256):
 def p_s_per_km(arr):
     if hasattr(arr,"ray_param_sec_per_deg"):
         return arr.ray_param_sec_per_deg / KM_PER_DEG
-    return arr.ray_param / KM_PER_DEG
+    return arr.ray_param / earth_radius_km
 
 def gc_deg(lat1,lon1,lat2,lon2):
     # great-circle distance in degrees
