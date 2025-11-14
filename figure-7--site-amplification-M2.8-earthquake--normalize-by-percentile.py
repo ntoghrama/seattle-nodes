@@ -239,7 +239,7 @@ def main():
             sm = plt.cm.ScalarMappable(cmap="plasma", norm=shared_norm)  # 1 → cbar_cap
             sm.set_array([])
             shared_cb = fig.colorbar(sm, cax=cax, orientation='vertical', fraction=0.03, pad=0.05)
-            shared_cb.set_label("Ratio of peak S-wave amplitude", fontsize=12)
+            shared_cb.set_label("Ratio of peak S-wave amplitudes", fontsize=12)
             shared_cb.ax.tick_params(labelsize=14)
 
             # integer ticks from 1 to cbar_cap
