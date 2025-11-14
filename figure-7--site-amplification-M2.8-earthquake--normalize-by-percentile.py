@@ -249,11 +249,11 @@ def main():
             ticks = np.linspace(start, end, num=n_steps, dtype=int) if end > start else [start]
             shared_cb.set_ticks(ticks)
             shared_cb.ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
-            combined_filename = f"figure-7--{quake}--normalized-energy-maps_{NORM_PCTL}-pctl--cbar-capped-{cbar_cap}--window-{window_start}-{window_end}-s.png"
+            combined_filename = f"figure-7--{quake}--normalized-S-wave-amplitude-maps_{NORM_PCTL}-pctl--cbar-capped-{cbar_cap}--window-{window_start}-{window_end}-s.png"
             print(combined_filename)
             fig.tight_layout(rect=[0.04, 0.02, 0.86, 0.91], w_pad=0.6)
         else:
-            combined_filename = f"figure-7--{quake}--normalized-energy-maps_{NORM_PCTL}-pctl--natural-cbars--window-{window_start}-{window_end}-s.png"
+            combined_filename = f"figure-7--{quake}--normalized-S-wave-amplitude-maps_{NORM_PCTL}-pctl--natural-cbars--window-{window_start}-{window_end}-s.png"
         fig.savefig(combined_filename, dpi=300, bbox_inches="tight")
         plt.show()
         plt.close(fig)
