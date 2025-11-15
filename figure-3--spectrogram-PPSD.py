@@ -172,7 +172,7 @@ for idx, ax in enumerate(axs):
     ax.set_xlim(time_edges_list[idx][0], time_edges_list[idx][-1])
     padval = 8 
     ax.set_title(titles[idx], fontsize=16, pad=padval)
-    label_letter = "A" if idx == 0 else "B"
+    label_letter = "(a)" if idx == 0 else "(b)"
     ax.text(0.01, 0.08, label_letter, transform=ax.transAxes,
             fontsize=24, color="white", fontweight="bold")
 
@@ -221,7 +221,7 @@ for idx, ax in enumerate(axs2):
     ax.set_xlim(time_edges_list[idx][0], time_edges_list[idx][-1])
     padval = 8 if idx == 0 else 30
     ax.set_title(titles[idx], fontsize=16, pad=padval)
-    label_letter = "A" if idx == 0 else "B"
+    label_letter = "(a)" if idx == 0 else "(b)"
     ax.text(0.01, 0.08, label_letter, transform=ax.transAxes,
             fontsize=24, color="white", fontweight="bold")
     fig2.colorbar(pcm, ax=ax, orientation='vertical',
